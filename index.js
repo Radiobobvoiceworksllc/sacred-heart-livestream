@@ -22,7 +22,7 @@ async function createFacebookLiveEvent() {
     body: JSON.stringify({
       title: "Sacred Heart Catholic Church Livestream",
       description: "Automated livestream event created by Cloud Run",
-      status: "SCHEDULED",
+      status: "SCHEDULED_UNPUBLISHED",
       planned_start_time: Math.floor(Date.now() / 1000) + 600
     })
   });
