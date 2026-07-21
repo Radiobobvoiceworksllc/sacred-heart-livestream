@@ -1,0 +1,13 @@
+{
+  "name": "shcc-livestream",
+  "version": "1.0.0",
+  "description": "Sacred Heart Catholic Church Create Livestream Event",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
