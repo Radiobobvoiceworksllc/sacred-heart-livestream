@@ -14,7 +14,12 @@ async function createFacebookLiveEvent() {
   const pageId = process.env.FB_PAGE_ID;
   const accessToken = process.env.FB_PAGE_ACCESS_TOKEN;
 
-  const url = `https://graph.facebook.com/${pageId}/live_videos`;
+  const url = `https://graph.facebook.com/${pageId}/live_videos?access_token=${accessToken}`;
+
+  // Build a valid planned start time (rounded + 15 minutes ahead)
+  const now = Math.floor(Date.now() / 1000);
+  const rounded = Math.floor(now / 60) * 60;
+  const plannedStart = rounded + (15 * 60); // 15 minutes from now
 
   const response = await fetch(url, {
     method: 'POST',
@@ -23,7 +28,7 @@ async function createFacebookLiveEvent() {
       title: "Sacred Heart Catholic Church Livestream",
       description: "Automated livestream event created by Cloud Run",
       status: "SCHEDULED_UNPUBLISHED",
-      planned_start_time: Math.floor(Date.now() / 1000) + 600
+      planned_start_time: plannedStart
     })
   });
 
