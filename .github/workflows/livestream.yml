@@ -1,0 +1,56 @@
+name: Sacred Heart Livestream Automation
+
+on:
+  # Runs every 5 minutes (GitHub Actions minimum granularity)
+  # Note: GitHub may delay by 1-3 min during high load — trigger window
+  # is set wide (13–22 min) below to guarantee at least 2 poll attempts.
+  schedule:
+    - cron: '*/5 * * * *'
+
+  # Allows manual trigger from the GitHub Actions UI (Actions tab → Run workflow)
+  workflow_dispatch:
+
+jobs:
+  poll:
+    name: Poll spreadsheet & create livestreams
+    runs-on: ubuntu-latest
+    timeout-minutes: 3    # kill the job if it hangs (prevents runaway billing even on free tier)
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'            # caches packages between runs — speeds up cold start
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run poll cycle
+        env:
+          # ── Credentials (stored as GitHub Repository Secrets) ──────────────
+          GOOGLE_SA_JSON_B64:       ${{ secrets.GOOGLE_SA_JSON_B64 }}
+          YT_TOKEN_PICKLE_B64:      ${{ secrets.YT_TOKEN_PICKLE_B64 }}
+          FB_PAGE_ID:               ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_ACCESS_TOKEN:     ${{ secrets.FB_PAGE_ACCESS_TOKEN }}
+          NOTIFY_FROM_EMAIL:        ${{ secrets.NOTIFY_FROM_EMAIL }}
+          NOTIFY_FROM_APP_PASSWORD: ${{ secrets.NOTIFY_FROM_APP_PASSWORD }}
+          NOTIFY_TO_EMAILS:         ${{ secrets.NOTIFY_TO_EMAILS }}
+
+          # ── Non-sensitive config (edit these directly here) ────────────────
+          SPREADSHEET_NAME: "Sacred Heart Livestream Events"
+          WORKSHEET_NAME:   "Sheet1"
+          TZ:               "America/Chicago"
+          LOG_LEVEL:        "INFO"
+
+          # Trigger window widened to 13–22 min (9-min wide) to guarantee
+          # at least 2 poll attempts at 5-min intervals, even if GitHub
+          # delays a run by a couple of minutes.
+          TRIGGER_MIN: "13"
+          TRIGGER_MAX: "22"
+          CLEANUP_MIN: "60"
+
+        run: python automation.py

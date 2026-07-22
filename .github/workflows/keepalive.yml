@@ -1,0 +1,22 @@
+name: Keep-Alive (prevent auto-disable)
+
+on:
+  # Runs on the 1st of every month — well within the 60-day window
+  schedule:
+    - cron: '0 8 1 * *'    # 8:00 AM Central on the 1st of each month
+
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    name: Re-enable scheduled workflows
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write    # needed to enable workflows via API
+
+    steps:
+      - name: Keep livestream workflow active
+        uses: gautamkrishnar/keepalive-workflow@v2
+        with:
+          workflow_files: "livestream.yml"
+          time_elapsed: 50    # trigger if no run in the last 50 days
